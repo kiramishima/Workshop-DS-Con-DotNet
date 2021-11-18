@@ -56,7 +56,7 @@ using Deedle;
 using System;
 using System.Globalization;
 
-var df = Deedle.Frame.ReadCsv(@"../DATASET/tailwind_sports_db.csv", separators: ",", hasHeaders: true);
+var df = Deedle.Frame.ReadCsv(@"", separators: ",", hasHeaders:);
 
 #!markdown
 
