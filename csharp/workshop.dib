@@ -56,7 +56,7 @@ using Deedle;
 using System;
 using System.Globalization;
 
-var df = Deedle.Frame.ReadCsv(@"", separators: ",", hasHeaders:);
+var df = Deedle.Frame.ReadCsv(@"../DATASET/tailwind_sports_db.csv", separators: ",", hasHeaders: true);
 
 #!markdown
 
@@ -67,7 +67,7 @@ dataframe.<b style="color: purple;">Rows</b>.<b style="color: blue;">Between</b>
 
 #!csharp
 
-// codigo
+df.Rows.Between(0, 5).Print();
 
 #!markdown
 
@@ -78,4 +78,16 @@ dataframe.<b style="color: purple;">Rows</b>.<b style="color: blue;">Between</b>
 
 #!csharp
 
-// codigo
+display(df.Columns.Keys)
+
+#!markdown
+
+# Ventas Totales
+
+De acuerdo al documento, Tailwind Sports desea conocer el total de las ventas, para ello debemos hacer la suma de nuestra columna `Ingreso` y aplicar la operacion suma. Así que para seleccionar una columna en especifico de un dataframe, usaremos la siguiente sintaxis:
+
+<b style="color: blue;">df</b>[<b style="color: orange;">columna</b>];
+
+Para aplicar la suma podemos la propiedad `Values`, el cual nos va regresar un Enumerable del tipo de dato, y podemos aplicar `Sum` de `System.Linq` y obtener el resultado. Pero para evitar hacer todo eso, usaremos la clase `Stats` y su metodo `sum`, al cual le pasamos la Serie seleccionada. Ejemplo:
+
+<b style="color: green;">Stats</b>.**sum**(<b style="color: blue;">df</b>[<b style="color: orange;">columna</b>]);
