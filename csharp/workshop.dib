@@ -1,0 +1,34 @@
+#!markdown
+
+# Intro Notebooks con C#
+
+Tenemos varias opciones, como escribir codígo o usar Markdown para escribir nuestros articulos y despues mostrar nuestros resultados gracias a la ejecución del codígo.
+En este Workshop trabajaremos el caso de nuestro cliente Tailwind Sports.
+
+Así que lo primero que haremos sera cargar nuestras librerías a este espacio de trabajo.
+
+#!markdown
+
+## Trabajando con Nuget Packages desde un Notebook
+
+Para usar las librerias de nuget haremos uso de la siguiente sintaxis : 
+
+```
+#r "<nuget package>, <nuget package version>"
+```
+
+En este proyecto utilizaremos las sig. librerías:
+
+
+1. FSharp.Data : Nos permitira trabajar con servicios externos de manera facil.
+2. Deedle : Inspirada en pandas, nos permitira trabajar con Dataframes.
+3. Plotly.NET : Nos permite crear graficos en HTML muy similar a lo que hace Bokeh y Matplotlib en Python.
+4. Newtonsoft.Json : Libreria para trabajar con JSON 
+
+#!csharp
+
+#r "nuget:FSharp.Data"
+#r "nuget:Deedle"
+#r "nuget: Plotly.NET, 2.0.0-preview.14"
+#r "nuget: Plotly.NET.Interactive, 2.0.0-preview.14"
+#r "nuget: Newtonsoft.Json"
