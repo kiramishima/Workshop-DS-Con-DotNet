@@ -22,15 +22,15 @@ En este proyecto utilizaremos las sig. librerías:
 
 1. FSharp.Data : Nos permitira trabajar con servicios externos de manera facil.
 2. Deedle : Inspirada en pandas, nos permitira trabajar con Dataframes.
-3. Plotly.NET : Nos permite crear graficos en HTML muy similar a lo que hace Bokeh y Matplotlib en Python.
+3. XPlot.Plotly : Nos permite crear graficos en HTML muy similar a lo que hace Bokeh y Matplotlib en Python.
 4. Newtonsoft.Json : Libreria para trabajar con JSON 
 
 #!csharp
 
 #r "nuget:FSharp.Data"
 #r "nuget:Deedle"
-#r "nuget: Plotly.NET, 2.0.0-preview.14"
-#r "nuget: Plotly.NET.Interactive, 2.0.0-preview.14"
+#r "nuget: XPlot.Plotly, 4.0.6"
+#r "nuget: XPlot.Plotly.Interactive, 4.0.6"
 #r "nuget: Newtonsoft.Json"
 
 #!markdown
@@ -106,6 +106,76 @@ Si **$2,571,850.00** representa las ventas totales, queremos ver como se divide 
 var df_filtrado = dataframe.<b style="color: purple;">FilterRowsBy</b>(<b style="color: blue;">"columna"</b>, <b style="color: green;">"Valor"</b>)
 
 var serieFiltrada = dataframe.<b style="color: purple;">FilterRowsBy</b>(<b style="color: blue;">"columna"</b>, <b style="color: green;">"Valor"</b>)[<b style="color: orange;">"Columna"</b>]
+
+#!csharp
+
+var compras = Stats.sum(df.FilterRowsBy("Tipo Orden", "Compra")["Ingreso"]);
+var percCompras = compras/vTotal;
+var devoluciones = Stats.sum(df.FilterRowsBy("Tipo Orden", "Devolucion")["Ingreso"]);
+var percDevoluciones = devoluciones / vTotal;
+
+display(new {
+    Compra = compras.ToString("C"),
+    PercCompra = percCompras.ToString("0.00%"),
+    Devoluciones = devoluciones.ToString("C"),
+    PercDevoluciones = percDevoluciones.ToString("0.00%"),
+    Total = vTotal.ToString("C")
+})
+
+#!markdown
+
+# Graficar las ventas mensuales
+
+En este apartado procederemos a usar Xplot. Para ello debemos importar el namespace Xplot.Plotly , el cuál contiene todas las funciones necesarias para renderizar nuestras grafícas. A continuacion mostraremos la sintaxis basíca para una grafica de columnas o barras.
+
+```csharp
+
+using XPlot.Plotly;
+
+// valores
+var x = new  [] {".NET", "Python", "Scala"};
+var y = new  [] {20, 20, 20};
+
+// Generamos nuestro grafíco
+var chart = Chart.Plot(
+    new Bar
+    {
+        y = y,
+        x = x,
+        marker = new Marker{color = "rgb(0, 0, 109)"}
+    }
+);
+
+// Le damos estilo al 
+var chart_layout = new Layout.Layout{
+    title="Titulo",
+    xaxis =new Xaxis{
+        title = "Texto Eje X"
+    },
+    yaxis = new Yaxis{
+        title = "Texto Eje Y"
+    }
+};
+chart.WithLayout(chart3_layout);
+chart.Show(); // chart en el notebook
+```
+
+Antes de graficar, debemos agrupar nuestra informacion, para ello usaremos el metodo `GroupRowsUsing` el cual recibe una funcion anonima o lambda donde el primer elemento es el indice y el segundo elemento son los elementos de nuestro dataframe.
+
+```csharp
+
+var data = df.GroupRowsUsing((index, kvp) => kvp.GetAs<Type>("Columna")).Nest().Observations
+    .Select(key => new {
+        // operacion
+    }).ToList()
+
+```
+
+Una vez agrupados, aplicamos el metodo Nest para crear una tupla entre el nuevo indice de la agrupacion y los valores que pertenecen a ese conjunto de datos. Posteriormente con la propiedad Observations convertimos el dataframe a tipo IEnumerable y con Select al estilo Linq armamos una nueva salida y convertimos esa salida a una Lista. Y luego pasamos a graficar nuestra información.
+
+#!csharp
+
+// codigo
 
 #!csharp
 

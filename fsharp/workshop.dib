@@ -110,4 +110,103 @@ var serieFiltrada = dataframe.<b style="color: purple;">FilterRowsBy</b>(<b styl
 
 #!fsharp
 
+let compras = df.FilterRowsBy("Tipo Orden", "Compra").["Ingreso"] |> Stats.sum
+let percCompras = compras / x
+let devoluciones = df.FilterRowsBy("Tipo Orden", "Devolucion").["Ingreso"] |> Stats.sum
+let percDevoluciones = devoluciones / x
+
+type IntegracionVentasPerc(compra, pcompra, devolucion, pdevolucion, total) =
+    member this.Compra = compra
+    member this.PercCompra = pcompra
+    member this.Devoluciones = devolucion
+    member this.PercDevoluciones = pdevolucion
+    member this.Total = total
+
+let integracion = IntegracionVentasPerc(compras.ToString("C"), percCompras.ToString("0.00%"), devoluciones.ToString("C"), percDevoluciones.ToString("0.00%"), x.ToString("C"))
+
+display(integracion)
+
+#!markdown
+
+# Graficar las ventas mensuales
+
+En este apartado procederemos a usar Plotly. Para ello debemos importar el namespace Plotly.NET , el cuál contiene todas las funciones necesarias para renderizar nuestras grafícas. A continuacion mostraremos la sintaxis basíca para una grafica de columnas o barras.
+
+```fsharp
+
+open Plotly.NET
+open Plotly.NET.LayoutObjects
+open Plotly.NET.TraceObjects
+
+// valores
+let x =  [|10; 20; 30; 40; 50 |]
+let y = [| "A"; "B"; "C"; "D"; "E" |];
+
+
+// Le damos mas estilo
+let mirroredXAxis =
+    LinearAxis.init(
+        Title = Title.init(Text="Texto Eje X"),
+        ShowLine = true,
+        Mirror = StyleParam.Mirror.AllTicks,
+        ShowGrid = false,
+        Ticks = StyleParam.TickOptions.Inside
+    )
+
+let mirroredLogYAxis = 
+    LinearAxis.init(
+        Title = Title.init(Text="Texto Eje Y"),
+        AxisType = StyleParam.AxisType.Auto,
+        ShowLine = true,
+        Mirror = StyleParam.Mirror.AllTicks,
+        ShowGrid = false,
+        Ticks = StyleParam.TickOptions.Inside
+    )
+
+let chart_layout = 
+    let tmp = Layout()
+    tmp?title<- "Titulo Grafica"
+    tmp?xaxis<- mirroredXAxis
+    tmp?yaxis<- mirroredLogYAxis
+    tmp
+
+let colors = x2 |> Array.map (fun name -> match name with
+                                                                |"A" -> Color.fromString "green"
+                                                                |"B" -> Color.fromString "blue"
+                                                                |"C" -> Color.fromString "red"
+                                                                |"D" -> Color.fromString "brown"
+                                                                |_ -> Color.fromString "deeppink") |> Color.fromColors
+
+let markers = Marker.init(Color=colors)
+
+// Creamos el grafico
+Chart.Column(y,x)
+    |> Chart.withLineStyle(Width=2.,Dash=StyleParam.DrawingStyle.Dot)
+    |> Chart.withLayout chart_layout
+    |> Chart.withMarker markers
+```
+
+Antes de graficar, debemos agrupar nuestra informacion, para ello usaremos el metodo `groupRowsUsing` del modulo `Frame` el cual recibe una lambda donde el primer elemento es el indice y el segundo elemento son los elementos de nuestro dataframe.
+
+```fsharp
+
+// Ejemplo
+let data = df |> Frame.groupRowsUsing(fun selector frame -> frame.GetAs<Type>("Columna"))
+   |> Frame.nest
+   |> Series.observations
+   |> Seq.map (fun ((m, y), frame) ->
+        // operacion
+   |> Seq.toList
+
+```
+
+Una vez agrupados, aplicamos el metodo `nest` del modulo `Frame` para crear una tupla entre el nuevo indice de la agrupacion y los valores que pertenecen a ese conjunto de datos. Posteriormente el metodo `observations` del modulo `Series` convertimos el resultado en `key` - `value`.
+Finalmente con el modulo Seq recorremos el arreglo y armamos la salida para finalmente convertirlo a lista.
+
+#!fsharp
+
+// codigo
+
+#!fsharp
+
 // codigo
