@@ -91,3 +91,22 @@ De acuerdo al documento, Tailwind Sports desea conocer el total de las ventas, p
 Para aplicar la suma podemos la propiedad `Values`, el cual nos va regresar un Enumerable del tipo de dato, y podemos aplicar `Sum` de `System.Linq` y obtener el resultado. Pero para evitar hacer todo eso, usaremos la clase `Stats` y su metodo `sum`, al cual le pasamos la Serie seleccionada. Ejemplo:
 
 <b style="color: green;">Stats</b>.**sum**(<b style="color: blue;">df</b>[<b style="color: orange;">columna</b>]);
+
+#!csharp
+
+var vTotal = Stats.sum(df["Ingreso"]);
+display($"Ventas Totales: {vTotal.ToString("C")}")
+
+#!markdown
+
+# Integracion de las ventas totales
+
+Si **$2,571,850.00** representa las ventas totales, queremos ver como se divide ese total entre compras y devoluciones. Para ello ocupamos filtrar por el `Tipo de Orden` . Para ello usaremos el metodo `FilterRowsBy` el cual recibe `columna a filtrar` y `valor a filtrar`.
+
+var df_filtrado = dataframe.<b style="color: purple;">FilterRowsBy</b>(<b style="color: blue;">"columna"</b>, <b style="color: green;">"Valor"</b>)
+
+var serieFiltrada = dataframe.<b style="color: purple;">FilterRowsBy</b>(<b style="color: blue;">"columna"</b>, <b style="color: green;">"Valor"</b>)[<b style="color: orange;">"Columna"</b>]
+
+#!csharp
+
+// codigo
