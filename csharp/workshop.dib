@@ -32,3 +32,46 @@ En este proyecto utilizaremos las sig. librerías:
 #r "nuget: Plotly.NET, 2.0.0-preview.14"
 #r "nuget: Plotly.NET.Interactive, 2.0.0-preview.14"
 #r "nuget: Newtonsoft.Json"
+
+#!markdown
+
+# Cargando datos en un Dataframe con Deedle
+
+### Para cargar datos desde un archivo, usaremos Deedle, importamos el namespace de Deedle, y posteriormente usamos la siguiente sintaxis:
+
+```
+using Deedle;
+
+var df = Deedle.Frame.ReadCsv("archivo.csv", separators: ",", hasHeaders: true);
+
+# hasHeaders en caso de que el archivo CSV cuente con headers en la primera fila
+# separators indica el tipo de separadores usados en el CSV, comunmente veremos ",", ";" , "\t" , etc 
+```
+
+En este taller usaremos el archivo `tailwind_sports_db.csv` que se encuentra en el directorio de DATASET
+
+#!csharp
+
+using Deedle;
+using System;
+using System.Globalization;
+
+var df = Deedle.Frame.ReadCsv(@"../DATASET/tailwind_sports_db.csv", separators: ",", hasHeaders: true);
+
+#!markdown
+
+#### Para visualizar los primeros 5 registros del dataframe, debemos usar la propiedad `Rows` y su metodo `Between`. Para imprimir usamos el metodo `Print` al final.
+
+
+dataframe.<b style="color: purple;">Rows</b>.<b style="color: blue;">Between</b>(<b style="color: green;">indice 1</b>, <b style="color: orange;">indice 2</b>)
+
+#!markdown
+
+#### Para visualizar el listado de columnas que tiene nuestro Dataframe, usamos la propiedad `Columns` y su propiedad `Keys`. Usando el comodin especial `display` podemos visualizar el resultado en el notebook.
+
+
+<b style="color: orange;">display</b><b style="color: green;">(</b>**dataframe**.<b style="color: purple;">Columns</b>.<b style="color: blue;">Keys</b><b style="color: green;">)</b>
+
+#!csharp
+
+// codigo
