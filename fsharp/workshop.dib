@@ -65,9 +65,17 @@ let df = Frame.ReadCsv(@"", separators=",", hasHeaders=)
 
 dataframe.<b style="color: purple;">Rows</b>.<b style="color: blue;">Between</b>(<b style="color: green;">indice 1</b>, <b style="color: orange;">indice 2</b>).**Print**()
 
+#!fsharp
+
+// codigo
+
 #!markdown
 
 #### Para visualizar el listado de columnas que tiene nuestro Dataframe, usamos la propiedad `Columns` y su propiedad `Keys`. Usando el comodin especial `display` podemos visualizar el resultado en el notebook.
 
 
 <b style="color: orange;">display</b><b style="color: green;">(</b>**dataframe**.<b style="color: purple;">Columns</b>.<b style="color: blue;">Keys</b><b style="color: green;">)</b>
+
+#!fsharp
+
+// codigo
