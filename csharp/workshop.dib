@@ -192,6 +192,8 @@ var data = df.GroupRowsUsing((x, kvp) => getMonthName(kvp.GetAs<DateTime>("Fecha
 
 #!csharp
 
+using XPlot.Plotly;
+
 // Graficando
 var chart = Chart.Plot(
     new Scatter
@@ -222,8 +224,29 @@ Para ello agruparemos sobre la columna: **Plataforma**
 
 #!csharp
 
-// codigo agrupacion
+var gplataformas = df.GroupRowsUsing((x, kvp) => kvp.GetAs<string>("Plataforma"))
+    .Nest().Observations.Select(key => new {
+    Plataforma = key.Key,
+    Total = Stats.sum(key.Value.GetColumn<double>("Ingreso"))
+}).ToList();
 
 #!csharp
 
-// codigo grafica
+var chart2 = Chart.Plot(
+    new Bar
+    {
+        x = gplataformas.Select(x => x.Plataforma),
+        y = gplataformas.Select(x => x.Total),        
+        marker = new Marker{color = "rgb(0, 0, 109)"}
+    }
+);
+var chart2_layout = new Layout.Layout{
+    title="Ventas x Plataforma",
+    xaxis =new Xaxis{
+        title = "Plataforma"
+    },
+    yaxis = new Yaxis{
+        title = "Ingreso"
+    }           
+};
+chart2

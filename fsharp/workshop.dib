@@ -279,8 +279,111 @@ Para ello agruparemos sobre la columna: **Plataforma**
 
 #!fsharp
 
-// codigo agrupacion
+type PlataformaIngreso(plataforma, total)=
+    member this.Plataforma=plataforma
+    member this.Total=total
+
+let data2 = df |> Frame.groupRowsUsing(fun _ c -> c.GetAs<string>("Plataforma"))
+            |> Frame.nest
+            |> Series.observations
+            |> Seq.map (fun (m, frame) -> PlataformaIngreso(m, frame.["Ingreso"] |> Stats.sum))
+            |> Seq.toList
+display(data2)
 
 #!fsharp
 
-// codigo grafica
+open Plotly.NET.TraceObjects
+
+let x2 = data2 |> List.map (fun x -> x.Plataforma) |> List.toArray 
+let y2 = data2 |> List.map (fun x -> x.Total) |> List.toArray 
+
+let mirroredXAxis2 =
+    LinearAxis.init(
+        Title = Title.init(Text="Plataforma"),
+        ShowLine = true,
+        Mirror = StyleParam.Mirror.AllTicks,
+        ShowGrid = false,
+        Ticks = StyleParam.TickOptions.Inside
+    )
+
+let mirroredLogYAxis2 = 
+    LinearAxis.init(
+        Title = Title.init(Text="Monto"),
+        AxisType = StyleParam.AxisType.Auto,
+        ShowLine = true,
+        Mirror = StyleParam.Mirror.AllTicks,
+        ShowGrid = false,
+        Ticks = StyleParam.TickOptions.Inside
+    )
+
+let chart_layout = 
+    let tmp = Layout()
+    tmp?title<- "Ventas x Plataforma"
+    tmp?xaxis<- mirroredXAxis2
+    tmp?yaxis<- mirroredLogYAxis2
+    tmp
+
+let colors = x2 |> Array.map (fun name -> match name with
+                                                                |"Website" -> Color.fromString "green"
+                                                                |"Facebook" -> Color.fromString "blue"
+                                                                |"Youtube" -> Color.fromString "red"
+                                                                |_ -> Color.fromString "deeppink") |> Color.fromColors
+
+let markers = Marker.init(Color=colors)
+
+
+Chart.Column(y2,x2)
+    |> Chart.withLineStyle(Width=2.,Dash=StyleParam.DrawingStyle.Dot)
+    |> Chart.withLayout chart_layout
+    |> Chart.withMarker markers
+
+#!markdown
+
+# Antes de terminar
+
+Plotly tiene una gran variedad de opciones para graficar, incluso nos da la opcion de utilizar mapas para plasmar nuestros datos al estilo de Folium.
+A continuacion se muestra un ejemplo basico para comenzar a trabajar con mapas y como podemos usarlo en combinacion de un API.
+
+#!fsharp
+
+open System.IO
+open System.Text
+open FSharp.Data
+open Newtonsoft.Json
+
+let data = 
+    Http.RequestString "https://raw.githubusercontent.com/plotly/datasets/master/fips-unemp-16.csv"
+    |> fun csv -> Frame.ReadCsvString(csv,true,separators=",",schema="fips=string,unemp=float")
+
+let geoJson = 
+    Http.RequestString "https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json"
+    |> JsonConvert.DeserializeObject 
+
+let locationsGeoJSON: string [] = 
+    data
+    |> Frame.getCol "fips"
+    |> Series.values
+    |> Array.ofSeq
+let zGeoJSON: int [] = 
+    data
+    |> Frame.getCol "unemp"
+    |> Series.values
+    |> Array.ofSeq
+
+Chart.ChoroplethMap(
+    locations = locationsGeoJSON,
+    z = zGeoJSON,
+    Locationmode=StyleParam.LocationFormat.GeoJson_Id,
+    GeoJson = geoJson,
+    FeatureIdKey="id"
+)
+
+|> Chart.withGeo(
+    Geo.init(
+        Scope=StyleParam.GeoScope.NorthAmerica, 
+        Projection=GeoProjection.init(StyleParam.GeoProjectionType.AzimuthalEqualArea),
+        ShowLand=true,
+        LandColor = Color.fromString "lightgrey"
+    )
+)
+|> Chart.withSize (800.,800.)
