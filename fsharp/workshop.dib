@@ -205,8 +205,82 @@ Finalmente con el modulo Seq recorremos el arreglo y armamos la salida para fina
 
 #!fsharp
 
-// codigo
+// Como Fecha esta en tipo String habra que reconvertirlo a tipo Date
+let dts = df.GetColumn<string>("Fecha").Values |> Seq.map (fun x -> DateTime.Parse x)
+df?Fecha <- dts
+
+type MesVenta(mes, venta) =
+    member this.Mes = mes
+    member this.Venta = venta
+
+// Agrupamos x mes
+let getMonthName (month:int) =
+    CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName month
+
+let data = df |> Frame.groupRowsUsing(fun _ c -> c.GetAs<DateTime>("Fecha").Month |> getMonthName)
+        |> Frame.nest
+        |> Series.observations
+        |> Seq.map (fun (m, frame) ->
+            // m,
+            MesVenta(m, frame.["Ingreso"] |> Stats.sum)
+            )
+        |> Seq.toList
+
+display(data)
 
 #!fsharp
 
-// codigo
+open Plotly.NET
+open Plotly.NET.LayoutObjects
+open Plotly.NET.TraceObjects
+
+// Obteniendo los valores
+let x = data |> List.map (fun x -> x.Mes) |> List.toArray 
+let y = data |> List.map (fun x -> x.Venta) |> List.toArray
+
+let mirroredXAxis =
+    LinearAxis.init(
+        Title = Title.init(Text="Meses"),
+        ShowLine = true,
+        Mirror = StyleParam.Mirror.AllTicks,
+        ShowGrid = false,
+        Ticks = StyleParam.TickOptions.Inside
+    )
+
+let mirroredLogYAxis = 
+    LinearAxis.init(
+        Title = Title.init(Text="Ingreso"),
+        AxisType = StyleParam.AxisType.Auto,
+        ShowLine = true,
+        Mirror = StyleParam.Mirror.AllTicks,
+        ShowGrid = false,
+        Ticks = StyleParam.TickOptions.Inside
+    )
+
+let chart_layout = 
+    let tmp = Layout()
+    tmp?title<- "Ventas Mensuales"
+    tmp?xaxis<- mirroredXAxis
+    tmp?yaxis<- mirroredLogYAxis
+    tmp
+
+Chart.Line(
+        x,y,
+        ShowMarkers=true,
+        MarkerSymbol=StyleParam.MarkerSymbol.Square)
+    |> Chart.withLineStyle(Width=2.,Dash=StyleParam.DrawingStyle.Dot)
+    |> Chart.withLayout chart_layout
+
+#!markdown
+
+## Finalmente , nuestro ultimo requerimiento consiste en graficar el comportamiento de sus ventas en las diferentes plataformas donde vende sus productos la empresa.
+
+Para ello agruparemos sobre la columna: **Plataforma**
+
+#!fsharp
+
+// codigo agrupacion
+
+#!fsharp
+
+// codigo grafica

@@ -175,8 +175,55 @@ Una vez agrupados, aplicamos el metodo Nest para crear una tupla entre el nuevo 
 
 #!csharp
 
-// codigo
+// Tipo de datos de nuestras columnas
+display(df.ColumnTypes);
+
+// Lambda para obtener el mes
+Func<int, string> getMonthName = month => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month);
+
+// Agrupando
+var data = df.GroupRowsUsing((x, kvp) => getMonthName(kvp.GetAs<DateTime>("Fecha").Month))
+    .Nest().Observations.Select(key => new {
+        Mes = key.Key,
+        Total = Stats.sum(key.Value.GetColumn<double>("Ingreso"))
+    }).ToList();
+
+// display(data);
 
 #!csharp
 
-// codigo
+// Graficando
+var chart = Chart.Plot(
+    new Scatter
+    {
+        x = data.Select(k => k.Mes).ToArray(),
+        y = data.Select(k => k.Total).ToArray(),
+        marker = new Marker{color = "rgb(0, 0, 109)"}
+    }
+);
+
+var chart_layout = new Layout.Layout{
+    title="Ventas Mensuales",
+    xaxis =new Xaxis{
+        title = "Meses"
+    },
+    yaxis = new Yaxis{
+        title = "Ingreso"
+    }
+};
+chart.WithLayout(chart_layout);
+chart
+
+#!markdown
+
+## Finalmente , nuestro ultimo requerimiento consiste en graficar el comportamiento de sus ventas en las diferentes plataformas donde vende sus productos la empresa.
+
+Para ello agruparemos sobre la columna: **Plataforma**
+
+#!csharp
+
+// codigo agrupacion
+
+#!csharp
+
+// codigo grafica
